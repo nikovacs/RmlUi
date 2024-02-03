@@ -76,6 +76,7 @@
 #include "XMLNodeHandlerTemplate.h"
 #include "XMLParseTools.h"
 #include <algorithm>
+#include "../../Include/RmlUi/Core/FileInterface.h"
 
 namespace Rml {
 
@@ -507,7 +508,9 @@ SharedPtr<StyleSheetContainer> Factory::InstanceStyleSheetString(const String& s
 SharedPtr<StyleSheetContainer> Factory::InstanceStyleSheetFile(const String& file_name)
 {
 	auto file_stream = MakeUnique<StreamFile>();
-	file_stream->Open(file_name);
+	std::string file_contents{};
+	GetFileInterface()->LoadFile(file_name, file_contents);
+	file_stream->Write(file_contents);
 	return InstanceStyleSheetStream(file_stream.get());
 }
 

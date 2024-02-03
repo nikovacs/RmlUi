@@ -33,6 +33,8 @@
 #include "StyleSheetNode.h"
 #include "StyleSheetParser.h"
 #include "StyleSheetSelector.h"
+#include "../../Include/RmlUi/Core.h"
+#include "../../Include/RmlUi/Core/FileInterface.h"
 
 namespace Rml {
 
@@ -212,13 +214,12 @@ UniquePtr<const StyleSheetContainer> StyleSheetFactory::LoadStyleSheetContainer(
 
 	// Open stream, construct new sheet and pass the stream into the sheet
 	auto stream = MakeUnique<StreamFile>();
-	if (stream->Open(sheet))
+	std::string sheet_contents{};
+	GetFileInterface()->LoadFile(sheet, sheet_contents);
+	new_style_sheet = MakeUnique<StyleSheetContainer>();
+	if (!new_style_sheet->LoadStyleSheetContainer(stream.get()))
 	{
-		new_style_sheet = MakeUnique<StyleSheetContainer>();
-		if (!new_style_sheet->LoadStyleSheetContainer(stream.get()))
-		{
-			new_style_sheet.reset();
-		}
+		new_style_sheet.reset();
 	}
 
 	return new_style_sheet;

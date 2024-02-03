@@ -47,6 +47,7 @@
 #include <algorithm>
 #include <iterator>
 #include <limits>
+#include "../../Include/RmlUi/Core/FileInterface.h"
 
 namespace Rml {
 
@@ -266,8 +267,9 @@ ElementDocument* Context::LoadDocument(const String& document_path)
 {
 	auto stream = MakeUnique<StreamFile>();
 
-	if (!stream->Open(document_path))
-		return nullptr;
+	std::string document_contents{};
+	GetFileInterface()->LoadFile(document_path, document_contents);
+	stream->Write(document_contents);
 
 	ElementDocument* document = LoadDocument(stream.get());
 

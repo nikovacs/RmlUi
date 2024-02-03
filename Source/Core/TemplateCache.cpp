@@ -30,6 +30,9 @@
 #include "../../Include/RmlUi/Core/Log.h"
 #include "StreamFile.h"
 #include "Template.h"
+#include "../../Include/RmlUi/Core.h"
+#include "../../Include/RmlUi/Core/FileInterface.h"
+
 
 namespace Rml {
 
@@ -73,30 +76,26 @@ Template* TemplateCache::LoadTemplate(const String& name)
 	// Nope, we better load it
 	Template* new_template = nullptr;
 	auto stream = MakeUnique<StreamFile>();
-	if (stream->Open(name))
+	std::string contents{};
+	GetFileInterface()->LoadFile(name, contents);
+	stream->Write(contents);
+	new_template = new Template();
+	if (!new_template->Load(stream.get()))
 	{
-		new_template = new Template();
-		if (!new_template->Load(stream.get()))
-		{
-			Log::Message(Log::LT_ERROR, "Failed to load template %s.", name.c_str());
-			delete new_template;
-			new_template = nullptr;
-		}
-		else if (new_template->GetName().empty())
-		{
-			Log::Message(Log::LT_ERROR, "Failed to load template %s, template is missing its name.", name.c_str());
-			delete new_template;
-			new_template = nullptr;
-		}
-		else
-		{
-			instance->templates[name] = new_template;
-			instance->template_ids[new_template->GetName()] = new_template;
-		}
+		Log::Message(Log::LT_ERROR, "Failed to load template %s.", name.c_str());
+		delete new_template;
+		new_template = nullptr;
+	}
+	else if (new_template->GetName().empty())
+	{
+		Log::Message(Log::LT_ERROR, "Failed to load template %s, template is missing its name.", name.c_str());
+		delete new_template;
+		new_template = nullptr;
 	}
 	else
 	{
-		Log::Message(Log::LT_ERROR, "Failed to open template file %s.", name.c_str());
+		instance->templates[name] = new_template;
+		instance->template_ids[new_template->GetName()] = new_template;
 	}
 
 	return new_template;
